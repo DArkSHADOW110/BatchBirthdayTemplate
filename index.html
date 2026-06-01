@@ -72,6 +72,20 @@
                         </div>
                     </div>
 
+                    <!-- Step 2.5: Celebratory Caption -->
+                    <div class="control-group" id="captionGroup">
+                        <div class="group-label-with-reset">
+                            <label class="group-label"><i class="fa-solid fa-envelope-open-text"></i> Celebratory Caption</label>
+                            <span class="badge-gold">Auto-Generated</span>
+                        </div>
+                        <div class="caption-container">
+                            <textarea id="captionBox" readonly rows="3" class="caption-textarea"></textarea>
+                            <button type="button" class="btn-copy-caption" id="copyCaptionBtn">
+                                <i class="fa-solid fa-copy"></i> Copy Caption
+                            </button>
+                        </div>
+                    </div>
+
                     <!-- Step 3: Photo Adjustments -->
                     <div class="control-group">
                         <div class="group-label-with-reset">
@@ -183,6 +197,11 @@
 
                     <!-- Action Buttons -->
                     <div class="download-action-block">
+                        <!-- Direct WhatsApp Phone Input -->
+                        <div class="phone-input-row">
+                            <i class="fa-solid fa-phone phone-icon"></i>
+                            <input type="tel" id="whatsapp-phone" placeholder="Enter 10-digit number (e.g. 0761772110)" maxlength="10" autocomplete="off">
+                        </div>
                         <div class="action-buttons-row">
                             <button type="button" class="btn-download" id="downloadBtn">
                                 <span class="btn-text-content">
@@ -195,10 +214,10 @@
                             
                             <button type="button" class="btn-share-whatsapp" id="shareWhatsappBtn">
                                 <span class="btn-share-content">
-                                    <i class="fa-brands fa-whatsapp"></i> Share on WhatsApp
+                                    <i class="fa-brands fa-whatsapp"></i> Send Direct WhatsApp
                                 </span>
                                 <div class="share-loader" style="display: none;">
-                                    <i class="fa-solid fa-circle-notch fa-spin"></i> Sharing...
+                                    <i class="fa-solid fa-circle-notch fa-spin"></i> Sending...
                                 </div>
                             </button>
                         </div>
@@ -225,7 +244,7 @@
             </div>
             <div class="footer-social">
                 <a href="https://www.facebook.com/share/1J9KAhD5kp/" target="_blank" title="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
-                <a href="https://api.whatsapp.com/send" target="_blank" title="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+                <a href="https://api.whatsapp.com/send?phone=94701222110" target="_blank" title="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
                 <a href="https://www.linkedin.com/in/thilan-k-hewawasam-04512b353/" target="_blank" title="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>
                 <a href="https://darkshadow110.github.io/thilankawishka/" target="_blank" title="Developer Portfolio"><i class="fa-solid fa-globe"></i></a>
             </div>

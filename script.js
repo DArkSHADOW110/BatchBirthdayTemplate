@@ -79,6 +79,9 @@ const elements = {
     fileNameText: document.getElementById('fileNameText'),
     removePhotoBtn: document.getElementById('removePhotoBtn'),
     nameInput: document.getElementById('nameInput'),
+    captionBox: document.getElementById('captionBox'),
+    copyCaptionBtn: document.getElementById('copyCaptionBtn'),
+    whatsappPhone: document.getElementById('whatsapp-phone'),
 
     // Sliders
     zoomSlider: document.getElementById('zoomSlider'),
@@ -126,6 +129,12 @@ function initApp() {
     
     // Populate sliders with CONFIG values
     syncSlidersFromState();
+    
+    // Set initial text inside celebratory caption box
+    updateCaptionBox();
+    
+    // Initialize the floating canvas observer for mobile devices
+    setupFloatingCanvasObserver();
     
     // Robust parallel loading using Promise.all to ensure template & font are loaded
     loadAssetsAndStart();
@@ -230,7 +239,33 @@ function setupEventListeners() {
     // Student Name Input
     elements.nameInput.addEventListener('input', (e) => {
         State.userName = e.target.value;
+        updateCaptionBox();
         requestDraw();
+    });
+    
+    // Copy Celebratory Caption Button
+    elements.copyCaptionBtn.addEventListener('click', () => {
+        const text = getDynamicText(State.userName);
+        navigator.clipboard.writeText(text)
+            .then(() => {
+                showToast('Celebratory caption copied to clipboard!');
+                
+                // Fine visual feedback animation on copy button
+                const btnIcon = elements.copyCaptionBtn.querySelector('i');
+                const btnText = elements.copyCaptionBtn.lastChild;
+                
+                btnIcon.className = 'fa-solid fa-circle-check';
+                if (btnText) btnText.nodeValue = ' Copied!';
+                
+                setTimeout(() => {
+                    btnIcon.className = 'fa-solid fa-copy';
+                    if (btnText) btnText.nodeValue = ' Copy Caption';
+                }, 2000);
+            })
+            .catch(err => {
+                console.error('Failed to copy caption:', err);
+                showToast('Error: Failed to copy caption.');
+            });
     });
     
     // Zoom/Scale Slider (min 0.5, max 2.0)
@@ -786,14 +821,31 @@ function showToast(message) {
  * Compiles dynamic celebratory greeting text with custom emojis.
  */
 function getDynamicText(name) {
-    const studentName = name.trim() || "Celebrant";
+    const studentName = name.trim() || "[Student name]";
     return `Happy Birthday, ${studentName}! 🎉\nWishing you strength, joy, and amazing opportunities ahead. Keep shining bright! ✨`;
 }
 
 /**
- * Executes mobile native Web Share API or falls back to desktop download + clipboard copy + WhatsApp Web.
+ * Executes direct WhatsApp messaging with strict 10-digit Sri Lankan phone number validation and conversion.
  */
 function triggerShareWhatsapp() {
+    const phoneInput = elements.whatsappPhone;
+    if (!phoneInput) return;
+    
+    // Sanitization: Remove any accidental spaces, dashes, or non-numeric characters using regex
+    let cleaned = phoneInput.value.replace(/\D/g, '');
+    
+    // Strict 10-Digit & Leading Zero Validation
+    const isValid = (cleaned.length === 10 && cleaned.startsWith('0'));
+    
+    if (!isValid) {
+        alert("Error: Please enter a valid 10-digit Sri Lankan phone number starting with 0 (e.g., 0761772110).");
+        return;
+    }
+    
+    // International Format Conversion: remove leading 0 and prepend 94
+    let formattedPhone = '94' + cleaned.substring(1);
+    
     const btn = elements.shareWhatsappBtn;
     const contentSpan = btn.querySelector('.btn-share-content');
     const loaderDiv = btn.querySelector('.share-loader');
@@ -807,63 +859,36 @@ function triggerShareWhatsapp() {
     
     const dynamicText = getDynamicText(State.userName);
     
-    // Convert to Blob for Web Share compatibility (type JPEG)
-    elements.canvas.toBlob((blob) => {
-        if (!blob) {
-            console.error('Blob generation failed');
-            showToast('Error: Failed to process canvas data.');
-            resetShareButton();
-            return;
-        }
+    // Step 1: Trigger the standard canvas download function programmatically
+    try {
+        const dataUrl = elements.canvas.toDataURL('image/png', 1.0);
+        const downloadLink = document.createElement('a');
+        const cleanedName = State.userName.trim()
+            ? State.userName.toLowerCase().replace(/[^a-z0-9]/g, '-')
+            : 'student-graphic';
+        downloadLink.download = `${cleanedName}.png`;
+        downloadLink.href = dataUrl;
         
-        const file = new File([blob], 'birthday.jpg', { type: 'image/jpeg' });
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
         
-        // Mobile-First Check: Web Share API file capability check
-        if (navigator.canShare && navigator.canShare({ files: [file] })) {
-            navigator.share({
-                title: 'Happy Birthday',
-                text: dynamicText,
-                files: [file]
-            })
-            .then(() => {
-                showToast('Shared successfully on WhatsApp!');
-                resetShareButton();
-            })
-            .catch((err) => {
-                console.log('Native share canceled/failed:', err);
-                resetShareButton();
-            });
-        } else {
-            // Desktop Fallback
-            // a) Trigger local JPEG download
-            triggerImageDownloadFallback((dataUrl) => {
-                // b) Copy caption text to clipboard
-                navigator.clipboard.writeText(dynamicText)
-                    .then(() => {
-                        // c) Show instruction toast
-                        showToast('Image saved & caption copied! Opening WhatsApp Web...');
-                        
-                        // d) Open WhatsApp Web link in new window tab
-                        setTimeout(() => {
-                            const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(dynamicText)}`;
-                            window.open(url, '_blank');
-                            resetShareButton();
-                        }, 1000);
-                    })
-                    .catch(err => {
-                        console.error('Clipboard copy failed:', err);
-                        showToast('Error: Failed to copy text to clipboard.');
-                        resetShareButton();
-                    });
-            });
-        }
-    }, 'image/jpeg', 0.92);
-    
-    function resetShareButton() {
-        btn.disabled = false;
-        contentSpan.style.display = 'block';
-        loaderDiv.style.display = 'none';
+        showToast('High-Res Poster downloaded successfully!');
+    } catch (err) {
+        console.error('Programmatic download failed:', err);
     }
+    
+    // Step 2 & 3: Safely encode text and redirect immediately in the same click thread to prevent popup blocking!
+    const encodedText = encodeURIComponent(dynamicText);
+    const whatsappUrl = `https://api.whatsapp.com/send?phone=${formattedPhone}&text=${encodedText}`;
+    
+    // Open immediately to satisfy security constraints of browser popup blockers
+    window.open(whatsappUrl, '_blank');
+    
+    // Reset button loading state
+    btn.disabled = false;
+    contentSpan.style.display = 'block';
+    loaderDiv.style.display = 'none';
 }
 
 /**
@@ -888,5 +913,112 @@ function triggerImageDownloadFallback(callback) {
     } catch (err) {
         console.error('Fallback image download failed:', err);
         showToast('Error: Failed to compile image.');
+    }
+}
+
+// ==========================================
+// 12. MOBILE FLOATING LIVE PREVIEW & INTERACTION SYSTEM
+// ==========================================
+/**
+ * Sets up an IntersectionObserver on the .canvas-frame-container.
+ * When the canvas scrolls out of view on mobile viewports (<= 992px),
+ * the canvas frame transitions into an elegant floating preview.
+ * Includes interactive tap-to-scroll controls to easily return to the full-size view.
+ */
+function setupFloatingCanvasObserver() {
+    if (!('IntersectionObserver' in window)) return;
+    
+    const container = document.querySelector('.canvas-frame-container');
+    const frame = document.querySelector('.canvas-frame');
+    
+    if (!container || !frame) return;
+    
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            const isMobile = window.innerWidth <= 992;
+            if (isMobile && !entry.isIntersecting) {
+                // Activate floating preview
+                frame.classList.add('floating-preview');
+                
+                // Dynamically inject double arrow icon and instruction text badge if not present
+                let badge = frame.querySelector('.floating-badge');
+                if (!badge) {
+                    badge = document.createElement('div');
+                    badge.classList.add('floating-badge');
+                    badge.innerHTML = '<i class="fa-solid fa-up-long"></i> View Full';
+                    frame.appendChild(badge);
+                }
+            } else {
+                // Deactivate floating preview
+                frame.classList.remove('floating-preview');
+                const badge = frame.querySelector('.floating-badge');
+                if (badge) badge.remove();
+            }
+        });
+    }, {
+        threshold: 0.05 // Trigger when less than 5% of the container is visible
+    });
+    
+    observer.observe(container);
+    
+    // Detect clean taps/clicks to scroll back to the full preview without interfering with drags
+    let clickStartX = 0;
+    let clickStartY = 0;
+    
+    frame.addEventListener('mousedown', (e) => {
+        clickStartX = e.screenX;
+        clickStartY = e.screenY;
+    });
+    
+    frame.addEventListener('mouseup', (e) => {
+        const dx = Math.abs(e.screenX - clickStartX);
+        const dy = Math.abs(e.screenY - clickStartY);
+        
+        // If it's a small tap (moved < 6px) and the canvas is currently floating, scroll to top
+        if (dx < 6 && dy < 6 && frame.classList.contains('floating-preview')) {
+            e.preventDefault();
+            e.stopPropagation();
+            scrollToPreview();
+        }
+    });
+    
+    frame.addEventListener('touchstart', (e) => {
+        if (e.touches.length > 0) {
+            clickStartX = e.touches[0].screenX;
+            clickStartY = e.touches[0].screenY;
+        }
+    }, { passive: true });
+    
+    frame.addEventListener('touchend', (e) => {
+        if (e.changedTouches.length > 0) {
+            const dx = Math.abs(e.changedTouches[0].screenX - clickStartX);
+            const dy = Math.abs(e.changedTouches[0].screenY - clickStartY);
+            
+            if (dx < 6 && dy < 6 && frame.classList.contains('floating-preview')) {
+                e.preventDefault();
+                e.stopPropagation();
+                scrollToPreview();
+            }
+        }
+    }, { passive: false });
+}
+
+/**
+ * Smoothly scrolls the viewport to position the preview card in the center.
+ */
+function scrollToPreview() {
+    const previewArea = document.querySelector('.preview-area');
+    if (previewArea) {
+        previewArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        showToast('Scrolling back to preview panel...');
+    }
+}
+
+/**
+ * Synchronizes the celebratory caption textarea content with State inputs.
+ */
+function updateCaptionBox() {
+    if (elements.captionBox) {
+        elements.captionBox.value = getDynamicText(State.userName);
     }
 }

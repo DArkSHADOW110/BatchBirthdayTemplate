@@ -50,6 +50,10 @@
 }
 
 /* --- Base Rules & Resets --- */
+html {
+    scroll-behavior: smooth;
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -375,6 +379,115 @@ body {
 }
 
 .input-wrapper input:focus {
+    border-color: var(--border-focus);
+    background: var(--bg-input-focus);
+    box-shadow: 0 0 10px var(--gold-glow), inset 0 0 4px rgba(0,0,0,0.5);
+}
+
+/* --- Celebratory Caption Box --- */
+.caption-container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background: rgba(22, 24, 34, 0.4);
+    border: 1px solid var(--bg-card-border);
+    border-radius: var(--radius-md);
+    padding: 12px;
+    margin-top: 5px;
+    transition: var(--transition-smooth);
+}
+
+.caption-container:hover {
+    border-color: rgba(196, 155, 61, 0.35);
+    box-shadow: 0 0 10px var(--gold-glow);
+}
+
+.caption-textarea {
+    width: 100%;
+    background: transparent;
+    border: none;
+    resize: none;
+    outline: none;
+    color: var(--text-primary);
+    font-family: var(--font-ui);
+    font-size: 0.82rem;
+    line-height: 1.4;
+    font-weight: 500;
+    cursor: text;
+    height: 70px;
+}
+
+.btn-copy-caption {
+    align-self: flex-end;
+    background: var(--gold-gradient);
+    color: #050608;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 6px 12px;
+    font-family: var(--font-ui);
+    font-size: 0.72rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: var(--transition-smooth);
+    box-shadow: 0 2px 6px rgba(196, 155, 61, 0.15);
+}
+
+.btn-copy-caption:hover {
+    background: var(--gold-gradient-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(196, 155, 61, 0.35);
+}
+
+.btn-copy-caption:active {
+    transform: translateY(0);
+}
+
+.badge-gold {
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: var(--text-gold);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* --- WhatsApp Phone Input --- */
+.phone-input-row {
+    position: relative;
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+    width: 100%;
+}
+
+.phone-input-row .phone-icon {
+    position: absolute;
+    left: 14px;
+    color: var(--gold-primary);
+    font-size: 0.9rem;
+    pointer-events: none;
+    z-index: 2;
+}
+
+.phone-input-row input {
+    width: 100%;
+    background: var(--bg-input);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 12px 14px 12px 38px;
+    font-family: var(--font-ui);
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    font-weight: 500;
+    outline: none;
+    transition: var(--transition-smooth);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+}
+
+.phone-input-row input:focus {
     border-color: var(--border-focus);
     background: var(--bg-input-focus);
     box-shadow: 0 0 10px var(--gold-glow), inset 0 0 4px rgba(0,0,0,0.5);
@@ -974,8 +1087,71 @@ input[type="range"]:hover::-moz-range-thumb {
     }
     
     .canvas-frame-container {
-        min-height: auto;
+        min-height: 462px;
         margin: 15px 0;
+    }
+    
+    /* Floating Mini Preview on Mobile */
+    .canvas-frame.floating-preview {
+        position: fixed;
+        bottom: 25px;
+        right: 25px;
+        width: 130px;
+        max-width: 130px;
+        z-index: 1000;
+        border: 2px solid var(--gold-primary);
+        border-radius: var(--radius-md);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.9), 0 0 20px var(--gold-glow);
+        background: rgba(13, 14, 18, 0.95);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        animation: slideInFloat 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+        transform-origin: bottom right;
+        margin: 0;
+        padding: 4px;
+        overflow: visible;
+    }
+    
+    .canvas-frame.floating-preview:hover {
+        border-color: var(--gold-bright);
+        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.95), 0 0 25px rgba(196, 155, 61, 0.4);
+    }
+    
+    .canvas-frame.floating-preview .canvas-helper-overlay {
+        display: none !important;
+    }
+    
+    .canvas-frame.floating-preview .floating-badge {
+        position: absolute;
+        bottom: -22px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--gold-gradient);
+        color: #050608;
+        font-size: 0.65rem;
+        font-weight: 700;
+        padding: 3px 10px;
+        border-radius: 20px;
+        white-space: nowrap;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        pointer-events: none;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5), 0 0 5px var(--gold-glow);
+        z-index: 1001;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    @keyframes slideInFloat {
+        0% {
+            transform: scale(0.6) translateY(50px);
+            opacity: 0;
+        }
+        100% {
+            transform: scale(1) translateY(0);
+            opacity: 1;
+        }
     }
 }
 
@@ -1011,6 +1187,7 @@ input[type="range"]:hover::-moz-range-thumb {
     }
     
     .canvas-frame-container {
+        min-height: 362px;
         margin: 8px 0;
     }
     
