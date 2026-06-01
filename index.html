@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2022 Batch Birthday Template Generator</title>
+    <!-- Google Fonts for UI Layout -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Floating Sparkles Background Particles -->
+    <div class="sparkles-container" id="sparklesContainer"></div>
+
+    <div class="app-container">
+        <!-- Brand Header -->
+        <header class="app-header">
+            <i class="fas fa-graduation-cap brand-icon"></i>
+            <h1 class="brand-title">2022 Batch Birthday Template Generator</h1>
+        </header>
+
+        <!-- Main Workspace -->
+        <main class="workspace-grid">
+            
+            <!-- Left Column: Controls Panel -->
+            <section class="control-panel">
+                <div class="card glass-card">
+                    <div class="card-header">
+                        <i class="fa-solid fa-sliders header-icon"></i>
+                        <h2>Controls Panel</h2>
+                    </div>
+
+                    <!-- Step 1: Upload Zone -->
+                    <div class="control-group">
+                        <label class="group-label"><span class="step-badge">1</span> Upload Student Photo</label>
+                        <div class="drag-drop-zone" id="dropZone">
+                            <input type="file" id="fileInput" accept="image/*" style="display: none;">
+                            <div class="upload-prompt">
+                                <i class="fa-solid fa-cloud-arrow-up upload-icon"></i>
+                                <p class="primary-prompt">Drag & Drop photo here</p>
+                                <p class="secondary-prompt">or <span class="browse-link">browse files</span></p>
+                                <p class="file-limits">Supports JPG, PNG or WebP</p>
+                            </div>
+                            <div class="upload-preview" id="uploadPreview" style="display: none;">
+                                <div class="preview-thumbnail-wrapper">
+                                    <img id="thumbnailImg" src="" alt="Thumbnail">
+                                    <div class="thumbnail-overlay">
+                                        <i class="fa-solid fa-check"></i>
+                                    </div>
+                                </div>
+                                <div class="preview-details">
+                                    <span class="file-name" id="fileNameText">photo.jpg</span>
+                                    <button type="button" class="btn btn-sm btn-outline-danger" id="removePhotoBtn">
+                                        <i class="fa-solid fa-trash-can"></i> Remove
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Name Input -->
+                    <div class="control-group">
+                        <label class="group-label" for="nameInput"><span class="step-badge">2</span> Student Name</label>
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-signature input-icon"></i>
+                            <input type="text" id="nameInput" placeholder="Enter student name..." autocomplete="off" maxlength="40">
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Photo Adjustments -->
+                    <div class="control-group">
+                        <div class="group-label-with-reset">
+                            <label class="group-label"><span class="step-badge">3</span> Adjust Photo Fit</label>
+                            <button class="btn-text" id="resetPhotoPosBtn"><i class="fa-solid fa-rotate-left"></i> Reset</button>
+                        </div>
+                        <div class="tip-banner">
+                            <i class="fa-solid fa-circle-info"></i>
+                            <span>Tip: Drag the photo directly inside the canvas to position it!</span>
+                        </div>
+                        
+                        <!-- Zoom Slider -->
+                        <div class="slider-row">
+                            <div class="slider-label">
+                                <span><i class="fa-solid fa-magnifying-glass-plus"></i> Image Zoom</span>
+                                <span class="slider-value" id="zoomVal">1.00x</span>
+                            </div>
+                            <input type="range" id="zoomSlider" min="0.5" max="2" step="0.01" value="1">
+                        </div>
+
+                        <!-- Y-Offset Slider -->
+                        <div class="slider-row">
+                            <div class="slider-label">
+                                <span><i class="fa-solid fa-arrows-up-down"></i> Y-Offset (Vertical)</span>
+                                <span class="slider-value" id="yOffsetVal">0px</span>
+                            </div>
+                            <input type="range" id="yOffsetSlider" min="-200" max="200" step="1" value="0">
+                        </div>
+                    </div>
+
+                    <!-- Calibration Accordion -->
+                    <div class="accordion-container">
+                        <button type="button" class="accordion-trigger" id="fineTuneToggle">
+                            <span class="trigger-title"><i class="fa-solid fa-screwdriver-wrench"></i> Template Calibration</span>
+                            <i class="fa-solid fa-chevron-down chevron-icon"></i>
+                        </button>
+                        <div class="accordion-content" id="fineTuneContent">
+                            <p class="fine-tune-desc">Fine-tune coordinates to align overlay elements exactly with your base template.</p>
+                            
+                            <div class="slider-row">
+                                <div class="slider-label">
+                                    <span>Circle Center X</span>
+                                    <span class="slider-value" id="circleXVal">540px</span>
+                                </div>
+                                <input type="range" id="circleXSlider" min="0" max="1080" step="1" value="540">
+                            </div>
+
+                            <div class="slider-row">
+                                <div class="slider-label">
+                                    <span>Circle Center Y</span>
+                                    <span class="slider-value" id="circleYVal">630px</span>
+                                </div>
+                                <input type="range" id="circleYSlider" min="0" max="1512" step="1" value="630">
+                            </div>
+
+                            <div class="slider-row">
+                                <div class="slider-label">
+                                    <span>Circle Radius</span>
+                                    <span class="slider-value" id="circleRadiusVal">225px</span>
+                                </div>
+                                <input type="range" id="circleRadiusSlider" min="50" max="500" step="1" value="225">
+                            </div>
+
+                            <div class="slider-row">
+                                <div class="slider-label">
+                                    <span>Text Y Position</span>
+                                    <span class="slider-value" id="textYVal">955px</span>
+                                </div>
+                                <input type="range" id="textYSlider" min="500" max="1512" step="1" value="955">
+                            </div>
+
+                            <div class="slider-row">
+                                <div class="slider-label">
+                                    <span>Base Font Size</span>
+                                    <span class="slider-value" id="fontSizeVal">106px</span>
+                                </div>
+                                <input type="range" id="fontSizeSlider" min="30" max="180" step="1" value="106">
+                            </div>
+
+                            <div class="fine-tune-actions">
+                                <button type="button" class="btn btn-sm btn-outline-gold w-100" id="copyConfigBtn">
+                                    <i class="fa-solid fa-copy"></i> Copy JS CONFIG
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Right Column: Preview Panel -->
+            <section class="preview-area">
+                <div class="card glass-card preview-card">
+                    <div class="card-header">
+                        <i class="fa-regular fa-image header-icon"></i>
+                        <h2>Preview Panel</h2>
+                        <span class="resolution-badge">High-Res: 1080x1512 px</span>
+                    </div>
+
+                    <!-- Framed Canvas -->
+                    <div class="canvas-frame-container">
+                        <div class="canvas-frame">
+                            <canvas id="birthdayCanvas" width="1080" height="1512"></canvas>
+                            <div class="canvas-helper-overlay" id="canvasHelperOverlay">
+                                <i class="fa-solid fa-arrow-pointer drag-pan-icon"></i>
+                                <span>Click/Drag inside canvas to position photo</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="download-action-block">
+                        <div class="action-buttons-row">
+                            <button type="button" class="btn-download" id="downloadBtn">
+                                <span class="btn-text-content">
+                                    <i class="fa-solid fa-download"></i> Download Image
+                                </span>
+                                <div class="download-loader" style="display: none;">
+                                    <i class="fa-solid fa-circle-notch fa-spin"></i> Rendering...
+                                </div>
+                            </button>
+                            
+                            <button type="button" class="btn-share-whatsapp" id="shareWhatsappBtn">
+                                <span class="btn-share-content">
+                                    <i class="fa-brands fa-whatsapp"></i> Share on WhatsApp
+                                </span>
+                                <div class="share-loader" style="display: none;">
+                                    <i class="fa-solid fa-circle-notch fa-spin"></i> Sharing...
+                                </div>
+                            </button>
+                        </div>
+                        <p class="download-caption">Generates a high-quality print-ready 1080x1512 pixel PNG.</p>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+        
+        <!-- Toast Notification -->
+        <div class="toast-notification" id="toast">
+            <i class="fa-solid fa-check-circle toast-icon"></i>
+            <span class="toast-message" id="toastMessage">Success! Image generated.</span>
+        </div>
+
+    </div>
+
+    <!-- Modern Site Footer -->
+    <footer class="site-footer">
+        <div class="footer-content">
+            <div class="footer-copyright">
+                <p>© 2026 Faculty of Technology, South Eastern University of Sri Lanka</p>
+            </div>
+            <div class="footer-social">
+                <a href="https://www.facebook.com/share/1J9KAhD5kp/" target="_blank" title="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+                <a href="https://api.whatsapp.com/send" target="_blank" title="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+                <a href="https://www.linkedin.com/in/thilan-k-hewawasam-04512b353/" target="_blank" title="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>
+                <a href="https://darkshadow110.github.io/thilankawishka/" target="_blank" title="Developer Portfolio"><i class="fa-solid fa-globe"></i></a>
+            </div>
+            <div class="footer-credit">
+                <p>Developed by <a href="https://darkshadow110.github.io/thilankawishka/" target="_blank" class="dev-link">Thilan Kawishka</a></p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Script File -->
+    <script src="script.js"></script>
+</body>
+</html>
